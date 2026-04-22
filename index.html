@@ -1085,16 +1085,22 @@
     btn.innerHTML = '<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg> Sending…';
 
     try {
-      const res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: new FormData(reviewForm) });
+      const data = Object.fromEntries(new FormData(reviewForm));
+      const res  = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data),
+      });
       const json = await res.json();
       if (json.success) {
         reviewForm.style.display = 'none';
         reviewSuccess.classList.remove('hidden');
         reviewError.classList.add('hidden');
-      } else { throw new Error(); }
-    } catch {
+      } else { throw new Error(json.message || 'Failed'); }
+    } catch (err) {
       btn.disabled = false;
       btn.innerHTML = 'Submit Review / Enviar Reseña <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
+      reviewError.textContent = 'Error: ' + err.message;
       reviewError.classList.remove('hidden');
     }
   });
@@ -1120,10 +1126,11 @@
     btn.innerHTML = '<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" stroke-opacity="1"/></svg> Sending…';
 
     try {
-      const data = new FormData(form);
+      const data = Object.fromEntries(new FormData(form));
       const res  = await fetch('https://api.web3forms.com/submit', {
         method: 'POST',
-        body: data,
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify(data),
       });
       const json = await res.json();
 
@@ -1138,9 +1145,8 @@
       btn.disabled = false;
       btn.innerHTML = 'Send My Request <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>';
       if (errorMsg) {
+        errorMsg.textContent = 'Error: ' + err.message + ' — or call (505) 365-9430.';
         errorMsg.classList.remove('hidden');
-      } else {
-        alert('Something went wrong. Please call us directly at (505) 365-9430.');
       }
     }
   });
